@@ -1,0 +1,56 @@
+version: '3.9'
+services:
+  adonis_app:
+    container_name: adonis_app
+    build:
+      context: .
+      target: dependencies
+    stdin_open: true
+    tty: true
+    command: dumb-init node ace serve --hmr
+    volumes:
+      # - .:/usr/src/app
+      - ./:/home/node/app
+    ports:
+      - '9229:9229'
+    env_file:
+      - .env
+    depends_on:
+      - adonis_database
+    networks:
+      - adonis-network
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  adonis_database:
+    image: mysql:8.0
+    restart: always
+    container_name: adonis_database
+    ports:
+      - '3311:3306'
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - adonis-network
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      retries: 10
+      interval: 3s
+      timeout: 30s
+    extra_hosts:
+      - 'host.docker.internal:172.31.0.1'
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  adonis-network:
+    name: adonis.network
+    driver: bridge
