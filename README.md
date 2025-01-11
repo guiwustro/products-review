@@ -87,6 +87,10 @@ The project will be accessible at:
 http://localhost:3000/
 ```
 
+## Demo Project
+
+![alt text](ProductsReview.gif)
+
 ## Features
 
 ### Front-End (with Nuxt.js)
@@ -110,6 +114,7 @@ http://localhost:3000/
    - A form where just admin users can publish a new product.
    - The form collects information such as product title, description, image,
      and category.
+   - Validation of these fields;
    - After submission, the product is added to the database.
 
 5. **Product Details Page**:
