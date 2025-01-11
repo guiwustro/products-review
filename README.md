@@ -24,8 +24,8 @@ The project was built using Vue.js with NuxtJS (v3.15)
 ### Back-end
 
 To start the back-end project, it is recommended to use Docker, as it is already
-configured with the API (one for integration tests). After setting up Docker,
-please run the following commands:
+configured with the API. After setting up Docker, please run the following
+commands:
 
 ```
 cd back-end
