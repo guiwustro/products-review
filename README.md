@@ -3,8 +3,8 @@
 ## Description
 
 Review a Product is a platform where users can discover, discuss, and review new
-products, apps, and tools. The goal of this project is to enable users to rate
-and search for products as well as interact through ratings and comments.
+products. The goal of this project is to enable users to rate and search for
+products as well as interact through ratings and comments.
 
 ## Technologies
 
