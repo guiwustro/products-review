@@ -24,6 +24,6 @@
     useCookie("auth_token").value = "";
     useCookie("products_review").value = "";
     useCookie("user").value = "";
-    router.push("/"); // Redireciona para o login
+    router.push("/");
   };
 </script>
