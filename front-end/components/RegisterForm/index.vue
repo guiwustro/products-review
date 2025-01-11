@@ -67,7 +67,7 @@
       </form>
       <p class="mt-4 text-center text-sm">
         Already have an account?
-        <NuxtLink to="/login" class="text-blue-500 hover:underline">
+        <NuxtLink to="/" class="text-blue-500 hover:underline">
           Login here
         </NuxtLink>
       </p>
@@ -87,20 +87,26 @@
     },
     methods: {
       async handleRegister() {
+        const { $axios, $toast } = useNuxtApp();
+
         if (this.password !== this.confirmPassword) {
-          alert("Passwords do not match");
+          $toast.error("Passwords do not match");
+
           return;
         }
         try {
-          const response = await this.$axios.post("/register", {
-            name: this.name,
+          await $axios.post("/register", {
+            fullName: this.name,
             email: this.email,
             password: this.password,
           });
-          this.$router.push("/login");
+          this.$router.push("/");
         } catch (error) {
-          console.error("Registration failed:", error);
-          alert("Registration failed. Please try again.");
+          $toast.error(
+            error?.response?.data?.message ??
+              error?.response?.data?.errors?.[0]?.message ??
+              "Registration failed. Please try again"
+          );
         }
       },
     },

@@ -2,9 +2,7 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ["~/assets/css/main.css", "vue3-toastify/dist/index.css"],
-  plugins: [
-    "~/plugins/toast.ts", // Path to your plugin
-  ],
+  plugins: ["~/plugins/toast.ts"],
   modules: ["@pinia/nuxt"],
   postcss: {
     plugins: {

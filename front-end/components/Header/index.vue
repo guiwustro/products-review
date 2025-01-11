@@ -1,7 +1,7 @@
 <template>
   <header class="flex justify-between p-4 bg-blue-600 text-white">
     <NuxtLink to="/products">
-      <div class="text-xl font-bold">Products</div>
+      <div class="text-xl font-bold">Reviewed products</div>
     </NuxtLink>
     <button
       @click="handleLogout"
@@ -21,11 +21,9 @@
 
   const handleLogout = () => {
     authStore.clearAuth();
-    useCookie("auth_token").value = ""; // Limpa o cookie de token
+    useCookie("auth_token").value = "";
+    useCookie("products_review").value = "";
+    useCookie("user").value = "";
     router.push("/"); // Redireciona para o login
   };
 </script>
-
-<style scoped>
-  /* Estilos podem ser personalizados conforme necessário */
-</style>

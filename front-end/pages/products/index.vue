@@ -1,39 +1,15 @@
-<script setup>
-  import { useModalStore } from "~/stores/modal";
-  import { onMounted } from "vue";
-  import AddProductModal from "~/components/AddProductModal";
-
-  const modalStore = useModalStore();
-  const { $axios } = useNuxtApp();
-
-  const products = ref([]);
-  const loading = ref(true);
-
-  const fetchProducts = async () => {
-    try {
-      const { data } = await $axios.get("/products");
-      products.value = data;
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  onMounted(fetchProducts);
-</script>
-
 <template>
   <div>
     <Header />
     <div class="p-4">
-      <h1 class="text-2xl font-semibold mb-4">Product List</h1>
+      <h1 class="text-2xl font-semibold mb-4">Products</h1>
 
       <button
+        v-if="isAdmin"
         @click="modalStore.openModal"
         class="bg-blue-600 text-white py-2 px-4 rounded mb-4"
       >
-        Adicionar Novo Produto
+        Add new product
       </button>
 
       <AddProductModal
@@ -50,7 +26,13 @@
           :key="product.id"
           class="bg-white p-4 rounded-lg shadow-md"
         >
-          <NuxtLink :to="`/products/${product.id}`" class="block">
+          <NuxtLink :to="`/products/${product.id}`" class="block w-full h-full">
+            <img
+              v-if="product.image"
+              :src="product.image"
+              alt="Product Image"
+              class="w-full h-40 object-cover rounded-lg mb-4"
+            />
             <h2 class="text-xl font-semibold">{{ product.name }}</h2>
             <p class="text-gray-700">{{ product.description }}</p>
             <div class="mt-2">
@@ -64,3 +46,35 @@
     </div>
   </div>
 </template>
+
+<script setup>
+  definePageMeta({
+    middleware: ["auth"],
+  });
+
+  import { useModalStore } from "~/stores/modal";
+  import { useAuthStore } from "~/stores/auth";
+  import { onMounted } from "vue";
+  import AddProductModal from "~/components/AddProductModal";
+
+  const modalStore = useModalStore();
+  const authStore = useAuthStore();
+  const { $axios } = useNuxtApp();
+
+  const products = ref([]);
+  const loading = ref(true);
+  const isAdmin = ref(authStore?.user?.isAdmin ?? 0);
+
+  const fetchProducts = async () => {
+    try {
+      const { data } = await $axios.get("/products");
+      products.value = data;
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  onMounted(fetchProducts);
+</script>

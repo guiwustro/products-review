@@ -56,6 +56,7 @@
   const authStore = useAuthStore();
 
   const authTokenCookies = useCookie("auth_token");
+  const user = useCookie("user");
   const productsWithReview = useCookie("products_review");
 
   const handleLogin = async () => {
@@ -73,12 +74,12 @@
       productsWithReview.value = JSON.stringify(
         reviews.map((review) => review.productId)
       );
+      user.value = JSON.stringify(response.data.user);
 
       authTokenCookies.value = token;
 
       authStore.setToken(token);
-
-      $toast.success("Successfully authenticated");
+      authStore.setUser(response.data.user);
 
       await router.push("/products");
     } catch (error) {

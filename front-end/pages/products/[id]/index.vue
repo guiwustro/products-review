@@ -5,19 +5,153 @@
       <div v-if="loading" class="text-center">Loading...</div>
 
       <div v-if="product && !loading" class="bg-white p-4 rounded-lg shadow-md">
-        <!-- Produto Detalhado -->
-        <div class="flex flex-col items-center mb-6">
-          <h1 class="text-3xl font-semibold">{{ product.name }}</h1>
-          <p class="text-gray-600 mt-2">{{ product.description }}</p>
-          <p class="mt-4 text-sm text-gray-500">
-            Category: {{ product.category }}
-          </p>
-          <p class="text-sm text-gray-400 mt-2">
-            Created at: {{ formatDate(product.createdAt) }}
-          </p>
+        <div
+          v-if="product && !loading"
+          class="bg-white p-4 rounded-lg shadow-md"
+        >
+          <div class="flex flex-col items-center mb-6">
+            <!-- Product Image -->
+            <div
+              class="w-full max-w-sm rounded-lg overflow-hidden shadow-lg border border-gray-200 bg-white"
+            >
+              <img
+                v-if="product.image"
+                :src="product.image"
+                alt="Product Image"
+                class="w-full h-64 object-contain bg-gray-100"
+              />
+            </div>
+
+            <!-- Product Details -->
+            <h1 class="text-3xl font-semibold mt-4 text-center">
+              {{ product.name }}
+            </h1>
+            <p class="text-gray-600 mt-2 text-center">
+              {{ product.description }}
+            </p>
+            <p class="mt-4 text-sm text-gray-500">
+              Category: {{ product.category }}
+            </p>
+
+            <!-- Média de Avaliações em Estrelas -->
+            <div class="mt-4 flex items-center">
+              <div class="flex">
+                <svg
+                  v-for="star in 5"
+                  :key="`average-star-${star}`"
+                  xmlns="http://www.w3.org/2000/svg"
+                  :class="
+                    star <= Math.ceil(averageRating)
+                      ? 'text-yellow-500'
+                      : 'text-gray-400'
+                  "
+                  class="h-6 w-6"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 15.27l4.15 2.18-1.08-4.69L18 7.24l-4.91-.42L10 2 7.91 6.82 3 7.24l3.93 5.52-1.08 4.69L10 15.27z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <span class="ml-2 text-gray-600 text-sm">
+                {{ averageRating.toFixed(1) }} / 5.0
+              </span>
+            </div>
+
+            <button
+              @click="openEditModal"
+              v-if="isAdmin"
+              class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            >
+              Edit Product
+            </button>
+
+            <button
+              @click="deleteProduct"
+              v-if="isAdmin"
+              class="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            >
+              Delete product
+            </button>
+          </div>
         </div>
 
-        <!-- Formulário para adicionar comentários -->
+        <!-- Modal -->
+        <div
+          v-if="showEditModal"
+          class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50"
+        >
+          <div class="bg-white w-96 p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Edit Product</h2>
+            <form @submit.prevent="updateProduct">
+              <div class="mb-4">
+                <label
+                  for="name"
+                  class="block text-sm font-medium text-gray-700"
+                >
+                  Name
+                </label>
+                <input
+                  id="name"
+                  v-model="editProduct.name"
+                  type="text"
+                  class="mt-1 block w-full p-2 border rounded-md"
+                  placeholder="Enter product name"
+                />
+              </div>
+              <div class="mb-4">
+                <label
+                  for="description"
+                  class="block text-sm font-medium text-gray-700"
+                >
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  v-model="editProduct.description"
+                  rows="3"
+                  class="mt-1 block w-full p-2 border rounded-md"
+                  placeholder="Enter product description"
+                ></textarea>
+              </div>
+              <div class="mb-4">
+                <label
+                  for="category"
+                  class="block text-sm font-medium text-gray-700"
+                >
+                  Category
+                </label>
+                <input
+                  id="category"
+                  v-model="editProduct.category"
+                  type="text"
+                  class="mt-1 block w-full p-2 border rounded-md"
+                  placeholder="Enter product category"
+                />
+              </div>
+
+              <div class="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  @click="closeEditModal"
+                  class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <div v-if="isNotCommented" class="mt-6">
           <h2 class="text-xl font-semibold">Add a Review</h2>
           <form @submit.prevent="submitReview" class="mt-4">
@@ -73,7 +207,6 @@
           </form>
         </div>
 
-        <!-- Comentários -->
         <div v-if="reviews.length > 0" class="mt-8">
           <h2 class="text-2xl font-semibold">Reviews</h2>
           <div
@@ -91,7 +224,6 @@
             </div>
             <div class="mt-2">
               <div class="flex">
-                <!-- Estrelas -->
                 <svg
                   v-for="star in 5"
                   :key="`star-${review.id}-${star}`"
@@ -122,15 +254,33 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from "vue";
-  import { useRoute } from "vue-router"; // Para pegar o ID da rota
+  definePageMeta({
+    middleware: ["auth"],
+  });
 
+  import { ref, onMounted } from "vue";
+  import { useRoute } from "vue-router";
+  import { useRouter } from "#app";
+
+  import { useAuthStore } from "~/stores/auth";
+
+  const authStore = useAuthStore();
   const route = useRoute();
+  const router = useRouter();
+
   const product = ref(null);
   const reviews = ref([]);
+  const averageRating = ref(null);
   const loading = ref(true);
   const imageBase64 = ref("");
   const isNotCommented = ref(true);
+  const isAdmin = ref(authStore?.user?.isAdmin ?? 0);
+
+  const showEditModal = ref(false);
+  const editProduct = ref({
+    name: "",
+    description: "",
+  });
 
   const newReview = ref({
     rating: 0,
@@ -145,7 +295,6 @@
 
   const { $axios, $toast } = useNuxtApp();
 
-  // Função para buscar o produto pelo ID
   const fetchProduct = async (id) => {
     try {
       const { data } = await $axios.get(`/products/${id}`);
@@ -161,20 +310,19 @@
     }
   };
 
-  // Função para buscar os reviews do produto
   const fetchReviews = async (id) => {
     try {
       const { data } = await $axios.get(`/products/${id}/reviews`);
-      reviews.value = data;
+      reviews.value = data.reviews;
+      averageRating.value = data.averageRating;
     } catch (error) {
       console.error("Failed to fetch reviews:", error);
     }
   };
 
-  // Função para enviar um novo comentário
   const submitReview = async () => {
     if (!newReview.value.rating || !newReview.value.comment) {
-      alert("Please provide a rating and a comment.");
+      $toast.error("Please provide a rating and a comment.");
       return;
     }
 
@@ -191,34 +339,67 @@
         ...productsAlreadyCommented.value,
         +route.params.id,
       ];
-      console.log(productsAlreadyCommented.value);
 
       fetchReviews(route.params.id);
       newReview.value = { rating: 0, comment: "" };
     } catch (error) {
-      console.error("Failed to submit review:", error);
+      $toast.error("Failed to submit review.");
     }
   };
 
-  // Definir o rating escolhido
   const setRating = (rating) => {
     newReview.value.rating = rating;
   };
 
-  // Formatação de data
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  // Carregar as informações do produto e reviews ao montar o componente
+  const openEditModal = () => {
+    editProduct.value = {
+      name: product.value.name,
+      description: product.value.description,
+      category: product.value.category,
+    };
+    showEditModal.value = true;
+  };
+
+  const closeEditModal = () => {
+    showEditModal.value = false;
+  };
+
+  const updateProduct = async () => {
+    try {
+      await $axios.put(`/products/${route.params.id}`, {
+        name: editProduct.value.name,
+        description: editProduct.value.description,
+        category: editProduct.value.category,
+      });
+      product.value.name = editProduct.value.name;
+      product.value.description = editProduct.value.description;
+      product.value.category = editProduct.value.category;
+      $toast.success("Product updated successfully");
+      closeEditModal();
+    } catch (error) {
+      console.error("Failed to update product:", error);
+      $toast.error("Failed to update product.");
+    }
+  };
+
+  const deleteProduct = async () => {
+    try {
+      await $axios.delete(`/products/${route.params.id}`);
+      $toast.success("Product deleted successfully");
+      router.push("/products");
+    } catch (error) {
+      $toast.error("Product can't be deleted");
+    }
+  };
+
   onMounted(() => {
     const productId = route.params.id;
     fetchProduct(productId);
     fetchReviews(productId);
   });
 </script>
-
-<style scoped>
-  /* Estilos adicionais */
-</style>

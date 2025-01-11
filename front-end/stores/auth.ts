@@ -4,6 +4,8 @@ interface User {
   id: number;
   name: string;
   email: string;
+  reviews: [];
+  isAdmin: 0 | 1;
 }
 
 interface AuthState {
@@ -13,8 +15,8 @@ interface AuthState {
 
 export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
-    user: null,
-    token: null,
+    user: (useCookie("user")?.value as unknown as User) || null,
+    token: useCookie("auth_token").value || null,
   }),
   actions: {
     setUser(user: User) {
