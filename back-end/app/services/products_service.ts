@@ -4,6 +4,8 @@ import {
   productIdValidator,
   updateProductValidator,
 } from '#validators/products_validator'
+import fs from 'node:fs'
+import path from 'node:path'
 
 /**
  * Fetch all products.
@@ -16,13 +18,13 @@ export async function getAllProducts() {
  * Create a new product.
  */
 export async function createProduct(data: Record<string, any>) {
+  // Validação dos dados
   const payload = await createProductValidator.validate(data)
 
   const product = await Product.create(payload)
 
   return product
 }
-
 /**
  * Fetch a product by ID.
  */

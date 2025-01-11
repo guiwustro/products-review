@@ -61,6 +61,7 @@
     "@adonisjs/vite": "^4.0.0",
     "@vinejs/vine": "^3.0.0",
     "bcrypt": "^5.1.1",
+    "cloudinary": "^2.5.1",
     "edge.js": "^6.2.0",
     "luxon": "^3.5.0",
     "mysql2": "^3.12.0",

@@ -6,7 +6,7 @@ import vine from '@vinejs/vine'
 export const createProductValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(3).maxLength(255),
-    image: vine.string().optional(),
+    image: vine.any().optional(),
     description: vine.string().trim().optional(),
     category: vine.string(),
   })

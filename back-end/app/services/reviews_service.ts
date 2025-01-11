@@ -13,5 +13,8 @@ export async function createReview(data: Record<string, any>) {
  */
 export async function getReviewsByProductId(productId: number) {
   const reviews = await Review.query().where('product_id', productId).preload('user')
-  return reviews
+
+  const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0)
+
+  return { reviews, averageRating }
 }

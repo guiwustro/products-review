@@ -9,6 +9,12 @@ import { Exception } from '@adonisjs/core/exceptions'
 export async function registerUser(data: Record<string, any>) {
   const payload = await createUserValidator.validate(data)
 
+  const alreadyExistUser = await User.findBy('email', payload.email)
+
+  if (alreadyExistUser) {
+    throw new Exception('E-mail already registered', { status: 409 })
+  }
+
   const user = await User.create({
     email: payload.email,
     password: payload.password,
@@ -27,7 +33,7 @@ export async function loginUser(data: Record<string, any>) {
   const user = await User.query().preload('reviews').where('email', payload.email).first()
 
   if (!user || !(await hash.verify(user.password, payload.password))) {
-    throw new Exception('Invalid credentials', { status: 400 })
+    throw new Exception('Invalid credentials', { status: 401 })
   }
 
   const token = await User.accessTokens.create(user)
