@@ -20,10 +20,16 @@ router.post('/login', [UsersController, 'login'])
 router.post('/register', [UsersController, 'register'])
 
 router.get('/products', [ProductsController, 'getAll']).use([middleware.auth()])
-router.post('/products', [ProductsController, 'create']).use([middleware.auth()])
+router
+  .post('/products', [ProductsController, 'create'])
+  .use([middleware.auth(), middleware.isAdmin()])
 router.get('/products/:id', [ProductsController, 'getById']).use([middleware.auth()])
-router.put('/products/:id', [ProductsController, 'update']).use([middleware.auth()])
-router.delete('/products/:id', [ProductsController, 'delete']).use([middleware.auth()])
+router
+  .put('/products/:id', [ProductsController, 'update'])
+  .use([middleware.auth(), middleware.isAdmin()])
+router
+  .delete('/products/:id', [ProductsController, 'delete'])
+  .use([middleware.auth(), middleware.isAdmin()])
 
 router.post('/products/:id/reviews', [ReviewsController, 'create']).use([middleware.auth()])
 router.get('/products/:id/reviews', [ReviewsController, 'getByProduct']).use([middleware.auth()])
